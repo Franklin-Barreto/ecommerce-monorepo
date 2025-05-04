@@ -66,6 +66,32 @@ public class OrderTest {
         );
     }
 
+    @Test
+    void shouldCreateAnOrderWithAllRequiredFields() {
+
+        var items = List.of(
+                new OrderItem(UUID.randomUUID(), "Product A", "10.00", 2)
+        );
+
+        var order = new Order(UUID.randomUUID(), "test@example.com", getShippingAddress(), items);
+
+        assertEquals(OrderStatus.PENDING, order.getStatus());
+
+        assertEquals(new BigDecimal("20.00"), order.getTotal());
+        assertEquals(2, order.getTotalItems());
+
+        assertEquals(1, order.getItems().size());
+        assertEquals("Product A", order.getItems().getFirst().getProductName());
+
+        var resultAddress = order.getShippingAddress();
+        assertEquals("Street", resultAddress.getStreet());
+        assertEquals("City", resultAddress.getCity());
+        assertEquals("State", resultAddress.getState());
+        assertEquals("12345", resultAddress.getNumber());
+        assertEquals("Country", resultAddress.getCountry());
+    }
+
+
     private ShippingAddress getShippingAddress() {
         return new ShippingAddress("Street", "City", "State", "12345", "Country");
     }
