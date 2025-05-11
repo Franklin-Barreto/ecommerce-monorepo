@@ -1,11 +1,17 @@
 package br.com.f2e.orderservice.domain;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class ShippingAddress {
-    private final String street;
-    private final String city;
-    private final String state;
-    private final String number;
-    private final String country;
+    private String street;
+    private String city;
+    private String state;
+    private String number;
+    private String country;
+
+    @SuppressWarnings("unused")
+    protected ShippingAddress() {}
 
     public ShippingAddress(String street, String city, String state, String number, String country) {
         this.street = street;
