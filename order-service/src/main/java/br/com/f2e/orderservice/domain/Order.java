@@ -1,24 +1,55 @@
 package br.com.f2e.orderservice.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Table(name= "orders")
 public class Order {
-    private final OrderStatus orderStatus;
-    private  UUID customerId;
-    private  String mail;
-    private  ShippingAddress address;
-    private List<OrderItem> items = new ArrayList<>();
 
-    public Order(UUID customerId, String mail, ShippingAddress address, List<OrderItem> items) {
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @UuidGenerator
+    private UUID id;
+
+    private OrderStatus orderStatus;
+
+    private  UUID customerId;
+
+    private  String mail;
+
+    @Embedded
+    private  ShippingAddress address;
+
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
+    private final List<OrderItem> items = new ArrayList<>();
+
+    @SuppressWarnings("unused")
+    protected Order() {
+        orderStatus = OrderStatus.PENDING;
+    }
+
+    public Order(UUID customerId, String mail, ShippingAddress address) {
         this.customerId = customerId;
         this.mail = mail;
         this.address = address;
-        this.items = items;
         orderStatus = OrderStatus.PENDING;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public UUID getCustomerId() {
@@ -33,13 +64,16 @@ public class Order {
         return mail;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.addOrder(this);
     }
 
     public BigDecimal getTotal() {
         return items.stream().map(OrderItem::getTotalPrice).reduce(BigDecimal.ZERO,BigDecimal::add);
     }
+
+    public void markAsPaid() { orderStatus = OrderStatus.PAID; }
 
     public int getTotalItems() {
        return  items.stream().map(OrderItem::getQuantity).reduce(0,Integer::sum);
@@ -51,9 +85,5 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return Collections.unmodifiableList(items);
-    }
-
-    public ShippingAddress getShippingAddress() {
-        return address;
     }
 }
