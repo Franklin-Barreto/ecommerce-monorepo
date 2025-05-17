@@ -34,6 +34,9 @@ public class OrderItem {
     protected OrderItem() {}
 
     public OrderItem(UUID productId, String productName, BigDecimal price, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
         this.productId = productId;
         this.productName = productName;
         this.price = price;

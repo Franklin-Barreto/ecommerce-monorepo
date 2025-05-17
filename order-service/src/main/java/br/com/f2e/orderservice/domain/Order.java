@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name= "orders")
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -26,14 +26,14 @@ public class Order {
 
     private OrderStatus orderStatus;
 
-    private  UUID customerId;
+    private UUID customerId;
 
-    private  String mail;
+    private String mail;
 
     @Embedded
-    private  ShippingAddress address;
+    private ShippingAddress address;
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private final List<OrderItem> items = new ArrayList<>();
 
     @SuppressWarnings("unused")
@@ -41,11 +41,15 @@ public class Order {
         orderStatus = OrderStatus.PENDING;
     }
 
-    public Order(UUID customerId, String mail, ShippingAddress address) {
+    public Order(UUID customerId, String mail, ShippingAddress address, List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
         this.customerId = customerId;
         this.mail = mail;
         this.address = address;
         orderStatus = OrderStatus.PENDING;
+        items.forEach(this::addItem);
     }
 
     public UUID getId() {
@@ -64,19 +68,21 @@ public class Order {
         return mail;
     }
 
-    public void addItem(OrderItem item) {
+    private void addItem(OrderItem item) {
         items.add(item);
         item.addOrder(this);
     }
 
     public BigDecimal getTotal() {
-        return items.stream().map(OrderItem::getTotalPrice).reduce(BigDecimal.ZERO,BigDecimal::add);
+        return items.stream().map(OrderItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public void markAsPaid() { orderStatus = OrderStatus.PAID; }
+    public void markAsPaid() {
+        orderStatus = OrderStatus.PAID;
+    }
 
     public int getTotalItems() {
-       return  items.stream().map(OrderItem::getQuantity).reduce(0,Integer::sum);
+        return items.stream().map(OrderItem::getQuantity).reduce(0, Integer::sum);
     }
 
     public OrderStatus getStatus() {
