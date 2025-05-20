@@ -1,0 +1,51 @@
+name: 'Terraform AWS Deploy'
+
+on:
+  push:
+    paths:
+      - 'terraform/**'
+  pull_request:
+    paths:
+      - 'terraform/**'
+
+jobs:
+  terraform:
+    name: 'Terraform Plan and Apply'
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    defaults:
+      run:
+        working-directory: ./terraform/order-service
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '1.5.5'
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        continue-on-error: true
+        run: |
+          terraform plan -input=false -detailed-exitcode -out=tfplan \
+            -var="db_user=$DB_USER" \
+            -var="db_password=$DB_PASSWORD"
+
+      - name: Terraform Apply (only if changes)
+        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success' && github.ref == 'refs/heads/main'
+        run: terraform apply -input=false -auto-approve tfplan
