@@ -8,11 +8,12 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = var.public_subnet_cidr
+  count                   = length(var.public_subnet_cidrs)
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zone.available.names[count.index]
   map_public_ip_on_launch = true
-  availability_zone = var.availability_zone
   tags = {
-    Name = "${var.vpc_name}-public-subnet"
+    Name = "public-subnet-${count.index}"
   }
 }

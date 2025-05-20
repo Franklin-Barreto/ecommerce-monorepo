@@ -4,10 +4,10 @@ provider "aws" {
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "order-service-subnet-group"
-  subnet_ids = [module.vpc.public_subnet_id]
+  subnet_ids = module.vpc.public_subnet_ids
 
   tags = {
-    Name = "order-service-subnet-group"
+    Name = "Order Service DB Subnet Group"
   }
 }
 
@@ -16,7 +16,7 @@ module "vpc" {
 
   cidr_block          = var.vpc_cidr
   vpc_name            = "order-service-vpc"
-  public_subnet_cidr  = var.public_subnet_cidr
+  public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
   availability_zone   = var.availability_zone
 }
 
@@ -49,7 +49,7 @@ module "ec2" {
 
   ami_id          = var.ami_id
   instance_type   = var.instance_type
-  subnet_id       = module.vpc.public_subnet_id
+  subnet_id       = module.vpc.public_subnet_ids
   user_data       = file("user-data.sh")
   instance_name   = "order-service-ec2"
   security_groups = [module.security_group.security_group_id]
