@@ -3,6 +3,8 @@ package br.com.f2e.orderservice.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -24,6 +26,7 @@ public class Order {
     @UuidGenerator
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
     private UUID customerId;
