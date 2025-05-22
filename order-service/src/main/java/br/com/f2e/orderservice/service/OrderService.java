@@ -3,7 +3,10 @@ package br.com.f2e.orderservice.service;
 import br.com.f2e.orderservice.controller.dto.OrderRequest;
 import br.com.f2e.orderservice.controller.dto.OrderResponse;
 import br.com.f2e.orderservice.repository.OrderRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -17,5 +20,9 @@ public class OrderService {
     public OrderResponse create(OrderRequest orderRequest) {
         var orderEntity = orderRequest.toEntity();
         return OrderResponse.toDto(repository.save(orderEntity));
+    }
+
+    public OrderResponse findById(UUID id) {
+        return repository.findById(id).map(OrderResponse::toDto).orElseThrow(EntityNotFoundException::new);
     }
 }
