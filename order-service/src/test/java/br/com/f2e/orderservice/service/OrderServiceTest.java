@@ -43,7 +43,7 @@ class OrderServiceTest {
     @Test
     void shouldCreateOrderSuccessfullyGivenValidOrderRequest() {
         var orderRequest = new OrderRequest(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), getItems());
-        Order order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), getItems().stream().map(OrderItemRequest::toEntity).toList());
+        var order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), getItems().stream().map(OrderItemRequest::toEntity).toList());
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(order);
         var orderResponse = orderService.create(orderRequest);
@@ -96,5 +96,4 @@ class OrderServiceTest {
             throw new RuntimeException(e);
         }
     }
-
 }
