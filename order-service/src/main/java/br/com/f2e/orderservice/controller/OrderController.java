@@ -1,9 +1,8 @@
 package br.com.f2e.orderservice.controller;
 
-import br.com.f2e.orderservice.controller.dto.OrderRequest;
-import br.com.f2e.orderservice.controller.dto.OrderResponse;
+import br.com.f2e.orderservice.dto.OrderRequest;
+import br.com.f2e.orderservice.dto.OrderResponse;
 import br.com.f2e.orderservice.service.OrderService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,29 +30,14 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(@RequestBody @Valid OrderRequest orderRequest) {
-        try {
-            OrderResponse orderResponse = orderService.create(orderRequest);
-            URI uri = URI.create("/orders/" + orderResponse.id());
-            return ResponseEntity.created(uri).body(orderResponse);
-        } catch (IllegalArgumentException ex) {
-            LOGGER.error("Something went wrong {}", ex.getMessage(), ex);
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            LOGGER.error("System error {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        LOGGER.info("creating order with request {}",orderRequest);
+        OrderResponse orderResponse = orderService.create(orderRequest);
+        URI uri = URI.create("/orders/" + orderResponse.id());
+        return ResponseEntity.created(uri).body(orderResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getById(@PathVariable UUID id) {
-        try {
-            return ResponseEntity.ok(orderService.findById(id));
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("Order not found for id {}", id, e);
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            LOGGER.error("System error {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(orderService.findById(id));
     }
 }

@@ -1,7 +1,7 @@
 package br.com.f2e.orderservice.service;
 
-import br.com.f2e.orderservice.controller.dto.OrderRequest;
-import br.com.f2e.orderservice.controller.dto.OrderResponse;
+import br.com.f2e.orderservice.dto.OrderRequest;
+import br.com.f2e.orderservice.dto.OrderResponse;
 import br.com.f2e.orderservice.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,6 @@ public class OrderService {
     }
 
     public OrderResponse findById(UUID id) {
-        return repository.findById(id).map(OrderResponse::toDto).orElseThrow(EntityNotFoundException::new);
+        return repository.findById(id).map(OrderResponse::toDto).orElseThrow(() -> new EntityNotFoundException("Order not found for id " + id));
     }
 }

@@ -1,9 +1,9 @@
 package br.com.f2e.orderservice.service;
 
-import br.com.f2e.orderservice.controller.dto.ItemResponse;
-import br.com.f2e.orderservice.controller.dto.OrderItemRequest;
-import br.com.f2e.orderservice.controller.dto.OrderRequest;
-import br.com.f2e.orderservice.controller.dto.OrderResponse;
+import br.com.f2e.orderservice.dto.ItemResponse;
+import br.com.f2e.orderservice.dto.OrderItemRequest;
+import br.com.f2e.orderservice.dto.OrderRequest;
+import br.com.f2e.orderservice.dto.OrderResponse;
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.OrderItem;
 import br.com.f2e.orderservice.domain.ShippingAddress;
