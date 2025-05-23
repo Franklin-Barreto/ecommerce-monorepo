@@ -1,7 +1,7 @@
 package br.com.f2e.orderservice.controller;
 
-import br.com.f2e.orderservice.controller.dto.OrderItemRequest;
-import br.com.f2e.orderservice.controller.dto.OrderRequest;
+import br.com.f2e.orderservice.dto.OrderItemRequest;
+import br.com.f2e.orderservice.dto.OrderRequest;
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.ShippingAddress;
 import br.com.f2e.orderservice.repository.OrderRepository;
@@ -87,13 +87,15 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequest))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].message", containsString("size must be between")));
     }
 
     @Test
-    void shouldReturnBadRequestWhenOrderRequestWhenCustomerEmailIsNull() throws Exception {
+    void shouldReturnBadRequestWhenCustomerEmailIsNull() throws Exception {
 
-        var orderRequest = new OrderRequest(CUSTOMER_ID, null, getShippingAddress(),getItems());
+        var orderRequest = new OrderRequest(CUSTOMER_ID, null, getShippingAddress(), getItems());
         var items = getItems().stream().map(OrderItemRequest::toEntity).toList();
         var order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), items);
 
@@ -105,7 +107,9 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequest))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].message", containsString("must not be blank")));
     }
 
     @Test
@@ -122,6 +126,14 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(ORDER_ID.toString()))
                 .andExpect(jsonPath("$.totalItems").value(3))
                 .andExpect(jsonPath("$.totalValue").value(25.00));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenOrderDoesNotExist() throws Exception {
+        mockMvc.perform(get(URI + "/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("Order not found")));
     }
 
     private ShippingAddress getShippingAddress() {

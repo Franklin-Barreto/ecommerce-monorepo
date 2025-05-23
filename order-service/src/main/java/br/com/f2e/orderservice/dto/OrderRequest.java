@@ -1,4 +1,4 @@
-package br.com.f2e.orderservice.controller.dto;
+package br.com.f2e.orderservice.dto;
 
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.ShippingAddress;
