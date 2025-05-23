@@ -73,9 +73,27 @@ class OrderControllerTest {
 
 
     @Test
-    void shouldReturnBadRequestWhenOrderRequestIsInvalid() throws Exception {
+    void shouldReturnBadRequestWhenOrderRequestHasNoItems() throws Exception {
 
         var orderRequest = new OrderRequest(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), Collections.emptyList());
+        var items = getItems().stream().map(OrderItemRequest::toEntity).toList();
+        var order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), items);
+
+        setOrderId(order, ORDER_ID);
+
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        mockMvc.perform(post(URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenOrderRequestWhenCustomerEmailIsNull() throws Exception {
+
+        var orderRequest = new OrderRequest(CUSTOMER_ID, null, getShippingAddress(),getItems());
         var items = getItems().stream().map(OrderItemRequest::toEntity).toList();
         var order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), items);
 

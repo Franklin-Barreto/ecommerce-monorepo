@@ -4,6 +4,7 @@ import br.com.f2e.orderservice.controller.dto.OrderRequest;
 import br.com.f2e.orderservice.controller.dto.OrderResponse;
 import br.com.f2e.orderservice.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> create(@RequestBody OrderRequest orderRequest) {
+    public ResponseEntity<OrderResponse> create(@RequestBody @Valid OrderRequest orderRequest) {
         try {
             OrderResponse orderResponse = orderService.create(orderRequest);
             URI uri = URI.create("/orders/" + orderResponse.id());
