@@ -5,17 +5,21 @@ import br.com.f2e.orderservice.controller.dto.OrderRequest;
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.ShippingAddress;
 import br.com.f2e.orderservice.repository.OrderRepository;
+import br.com.f2e.orderservice.service.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
+@Import(OrderService.class)
 @AutoConfigureMockMvc
 class OrderControllerTest {
 
@@ -66,8 +71,21 @@ class OrderControllerTest {
 
 
     @Test
-    void shouldReturnBadRequestWhenOrderRequestIsInvalid() {
+    void shouldReturnBadRequestWhenOrderRequestIsInvalid() throws Exception {
 
+        var orderRequest = new OrderRequest(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), Collections.emptyList());
+        var items = getItems().stream().map(OrderItemRequest::toEntity).toList();
+        var order = new Order(CUSTOMER_ID,CUSTOMER_EMAIL,getShippingAddress(),items);
+
+        setOrderId(order,ORDER_ID);
+
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     private ShippingAddress getShippingAddress() {
