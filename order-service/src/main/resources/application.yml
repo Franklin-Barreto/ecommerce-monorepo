@@ -4,9 +4,9 @@ spring:
   liquibase:
     change-log: classpath:/liquibase/master.xml
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT}}/${POSTGRES_DB_NAME}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:12345}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -14,3 +14,9 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       connection-timeout: 30000
+  rabbitmq:
+    port: 5672
+    stream:
+      username: ${RABBITMQ_USER:guest}
+      password: ${RABBITMQ_PASS:guest}
+      host: ${RABBITMQ_HOST:localhost}
