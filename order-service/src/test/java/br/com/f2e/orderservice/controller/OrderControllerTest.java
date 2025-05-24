@@ -4,10 +4,13 @@ import br.com.f2e.orderservice.dto.OrderItemRequest;
 import br.com.f2e.orderservice.dto.OrderRequest;
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.ShippingAddress;
+import br.com.f2e.orderservice.messaging.event.OrderCreatedEvent;
+import br.com.f2e.orderservice.messaging.publisher.RabbitMQDomainEventPublisher;
 import br.com.f2e.orderservice.repository.OrderRepository;
 import br.com.f2e.orderservice.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,6 +28,8 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
-@Import(OrderService.class)
+@Import({OrderService.class, RabbitMQDomainEventPublisher.class})
 @AutoConfigureMockMvc
 class OrderControllerTest {
 
@@ -48,6 +53,8 @@ class OrderControllerTest {
 
     @MockitoBean
     private OrderRepository orderRepository;
+    @MockitoBean
+    private RabbitTemplate rabbitTemplate;
 
     @Test
     void shouldCreateOrderSuccessfullyGivenValidRequest() throws Exception {
@@ -59,6 +66,7 @@ class OrderControllerTest {
         setOrderId(order, ORDER_ID);
 
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+        doNothing().when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(OrderCreatedEvent.class));
 
         mockMvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)

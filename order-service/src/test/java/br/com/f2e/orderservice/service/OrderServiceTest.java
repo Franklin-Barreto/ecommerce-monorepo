@@ -1,15 +1,19 @@
 package br.com.f2e.orderservice.service;
 
-import br.com.f2e.orderservice.dto.ItemResponse;
+import br.com.f2e.orderservice.dto.OrderItemResponse;
 import br.com.f2e.orderservice.dto.OrderItemRequest;
 import br.com.f2e.orderservice.dto.OrderRequest;
 import br.com.f2e.orderservice.dto.OrderResponse;
 import br.com.f2e.orderservice.domain.Order;
 import br.com.f2e.orderservice.domain.OrderItem;
 import br.com.f2e.orderservice.domain.ShippingAddress;
+import br.com.f2e.orderservice.messaging.config.MessagingConfig;
+import br.com.f2e.orderservice.messaging.event.OrderCreatedEvent;
+import br.com.f2e.orderservice.messaging.publisher.DomainEventPublisher;
 import br.com.f2e.orderservice.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +29,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,16 +45,28 @@ class OrderServiceTest {
     private OrderService orderService;
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private DomainEventPublisher eventPublisher;
 
     @Test
     void shouldCreateOrderSuccessfullyGivenValidOrderRequest() {
         var orderRequest = new OrderRequest(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), getItems());
         var order = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), getItems().stream().map(OrderItemRequest::toEntity).toList());
+
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(order);
+
         var orderResponse = orderService.create(orderRequest);
+        var capture = ArgumentCaptor.forClass(OrderCreatedEvent.class);
+
+        verify(eventPublisher).publish(eq(MessagingConfig.ORDER_CREATED_ROUTING_KEY), capture.capture());
+
+        var orderCreatedEvent = capture.getValue();
+
         assertEquals(3, orderResponse.totalItems());
         assertEquals(25.00, orderResponse.totalValue());
+        assertEquals("25.00", orderCreatedEvent.totalAmount());
+
     }
 
     @Test
@@ -67,8 +85,10 @@ class OrderServiceTest {
 
         Order mockOrder = new Order(CUSTOMER_ID, CUSTOMER_EMAIL, getShippingAddress(), items);
         setOrderId(mockOrder,ORDER_ID);
+
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
-        var itemsResponse = items.stream().map(ItemResponse::toDto).toList();
+
+        var itemsResponse = items.stream().map(OrderItemResponse::toDto).toList();
         var expectedResponse = new OrderResponse(ORDER_ID, itemsResponse,3, 25.00);
 
         OrderResponse response = orderService.findById(orderId);
