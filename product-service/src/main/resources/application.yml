@@ -3,5 +3,8 @@ spring:
     name: product-service
   liquibase:
     change-log: classpath:/liquibase/master.xml
+  sql:
+    init:
+      mode: always
 server:
   port: 8081
