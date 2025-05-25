@@ -4,9 +4,9 @@ spring:
   liquibase:
     change-log: classpath:/liquibase/master.xml
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT}}/${POSTGRES_DB_NAME}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB_NAME:orders}
     username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:12345}
+    password: ${POSTGRES_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -20,3 +20,6 @@ spring:
       username: ${RABBITMQ_USER:guest}
       password: ${RABBITMQ_PASS:guest}
       host: ${RABBITMQ_HOST:localhost}
+springdoc:
+  api-docs:
+    path: /api-docs
