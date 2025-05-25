@@ -3,3 +3,5 @@ spring:
     name: product-service
   liquibase:
     enabled: false
+server:
+  port: 8081
