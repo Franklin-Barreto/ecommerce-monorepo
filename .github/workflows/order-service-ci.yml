@@ -1,17 +1,23 @@
-name: CI
+name: CI - Order Service
 
 on:
   pull_request:
+    paths:
+      - 'order-service/**'
     branches:
       - main
       - develop
 
 jobs:
-  test-java:
+  test-order-service:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: order-service
+
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up JDK 21
