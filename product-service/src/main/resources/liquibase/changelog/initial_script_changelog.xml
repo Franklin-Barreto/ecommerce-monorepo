@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1748205356124-1" author="franklinbarreto">
+        <createTable tableName="brand">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_brand"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(300)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1748205356124-2" author="franklinbarreto">
+        <createTable tableName="category">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_category"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(300)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1748205356124-3" author="franklinbarreto">
+        <createTable tableName="image">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_image"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="alt_text" type="VARCHAR(200)"/>
+            <column name="is_main" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1748205356124-4" author="franklinbarreto">
+        <createTable tableName="product">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_product"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(200)"/>
+            <column name="description" type="VARCHAR(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DECIMAL(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="brand_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1748205356124-5" author="franklinbarreto">
+        <addUniqueConstraint columnNames="name" constraintName="uc_brand_name" tableName="brand"/>
+    </changeSet>
+    <changeSet id="1748205356124-6" author="franklinbarreto">
+        <addUniqueConstraint columnNames="name" constraintName="uc_category_name" tableName="category"/>
+    </changeSet>
+    <changeSet id="1748205356124-7" author="franklinbarreto">
+        <addForeignKeyConstraint baseColumnNames="product_id" baseTableName="image" constraintName="FK_IMAGE_ON_PRODUCT"
+                                 referencedColumnNames="id" referencedTableName="product"/>
+    </changeSet>
+    <changeSet id="1748205356124-8" author="franklinbarreto">
+        <addForeignKeyConstraint baseColumnNames="brand_id" baseTableName="product" constraintName="FK_PRODUCT_ON_BRAND"
+                                 referencedColumnNames="id" referencedTableName="brand"/>
+    </changeSet>
+    <changeSet id="1748205356124-9" author="franklinbarreto">
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="product"
+                                 constraintName="FK_PRODUCT_ON_CATEGORY" referencedColumnNames="id"
+                                 referencedTableName="category"/>
+    </changeSet>
+
+</databaseChangeLog>
