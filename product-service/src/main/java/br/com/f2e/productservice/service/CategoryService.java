@@ -4,6 +4,7 @@ import br.com.f2e.productservice.dto.CategoryRequest;
 import br.com.f2e.productservice.dto.CategoryResponse;
 import br.com.f2e.productservice.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class CategoryService {
         return CategoryResponse.from(repository.save(request.toEntity()));
     }
 
+    @Transactional
     public void update(UUID id, CategoryRequest categoryRequest) {
         LOGGER.info("updating category id {}, request {}", id, categoryRequest);
         int updated = repository.update(id, categoryRequest.name(), categoryRequest.description());
@@ -36,6 +38,7 @@ public class CategoryService {
         }
     }
 
+    @Transactional
     public void delete(UUID id) {
         repository.deleteById(id);
     }
